@@ -1,0 +1,36 @@
+1 File System --------------------------------------------------
+
+Name: SFTS (Simple File Table System)
+Description: First simple fs uses 22-byte entries
+Entry Size: 22 bytes
+Entry Sections: 3 (FileName, LocSector, SizeInSector)
+Padding: with zeros
+
+Structure:
+
+    Byte              Description
+    ----------------------------------
+    0-19              File name
+    20                Starting sector
+    21                Sectors count
+
+----------------------------------------------------------------
+
+2 File System --------------------------------------------------
+
+Name: SDFS (Simple Dynamic File System)
+Based on: SFTS
+Description: Simple fs with dynamic entries
+Entry Size: dynamic
+Entry Sections: 3 (FileName, LocSector, SizeInSector)
+Padding: with zeros
+
+Structure:
+
+    Type              Description
+    ------------------------------------------------
+    String            File name (zero at the end)
+    unsigned byte     Starting sector
+    unsigned byte     Sectors count
+
+----------------------------------------------------------------
