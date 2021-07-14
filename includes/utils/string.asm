@@ -1,5 +1,9 @@
-;; Print a string
-;; -----------------------------------------------------
+;;
+;; string.asm: functions for working with strings
+;;
+
+;; print_string: print a string
+;; si - *string pointer
 print_string:
     pusha
     mov ah, 0x0e
@@ -13,7 +17,7 @@ print_string_end:
     popa
     ret
 
-;; print_sybmol_times: print desired char (cx value) times
+;; print_sybmol_times: print desired char 'CX' times
 ;; al - char, cx - count of iterations
 print_symbol_times:
     mov ah, 0x0e
@@ -21,8 +25,8 @@ print_symbol_times:
     loop print_symbol_times
     ret
 
-;; Get string length stored in SI. Result stores in CX.
-;; -----------------------------------------------------
+;; get_string_length: get string length
+;; si - *string pointer | Return: cx - chars count
 get_string_length:
     xor cx, cx
     push si
@@ -36,8 +40,9 @@ get_string_length:
     pop si
     ret
 
-;; Compare lenth of two string. 01h = true, 00h = false
-;; SI = 1 str, DI - 2 str
+;; compare_string_length: compare two string lengths
+;; si - *first string pointer, di - *second string pointer
+;; Return: al - 0x01 = true (Length are equal) | al - 0x00 = false
 compare_string_length:
     push si
     call get_string_length
@@ -58,9 +63,9 @@ compare_string_length:
     mov al, 0x00
     ret
 
-;; Compare string in SI with DI. Al = 01 if equals, 00 = not equal.
-;; -----------------------------------------------------
-;; SI = 1 string, DI = 2 string
+;; compare_string: compare two strings
+;; si - *first string pointer, di - *second string pointer
+;; Return: al - 0x01 = true (strings are equal) | al - 0x00 = false
 copmare_string:
     ;; Compare length
     call compare_string_length

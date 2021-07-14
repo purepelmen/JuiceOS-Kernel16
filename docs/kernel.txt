@@ -1,0 +1,21 @@
+JuiceOS Kernel 16-bit -----------------------------------------------
+
+This is the entry point to all other software in my os. The kernel contains basic prompt with some commands,
+and the ability to launch some programs.
+
+-- About running kernel
+
+    The kernel can't just be runned. Before you jumps to kernel memory location (0x2000), you must set 'al'
+    register to special code that describes how kernel will be runned.
+
+    Special codes:
+
+        0xBF - initial loading. The bootloader loads kernel with this way. This will save boot drive to
+            'dl' register, and reset the screen.
+        0xC0 - return to execution. When a program wants to return to kernel, it must use this special code.
+            it doesn't resets 'dl' register and doesn't clear the screen.
+        0xF0 - return from sleep. When kernel wake up from power save mode, it run itself with this code.
+
+    What happens if given special code isn't defined in kernel? Kernel won't show its prompt and display error
+    message. Then after pressing any key PC will reboot.
+    

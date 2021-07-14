@@ -1,7 +1,10 @@
+;;
+;; input.asm: works with user input
+;;
+
 ;; start_getting_input: takes input from user and stops when ENTER is pressed
-;; * process_input - point where code jumps to after taking the input
-;; * inputBuffer: reference to input buffer is located
-;; ---------------------------------------------------------------------------
+;; *process_input - point where code jumps to after taking the input
+;; *inputBuffer: reference to input buffer is located
 start_getting_input:
     call reset_cmd
     mov di, inputBuffer
@@ -38,8 +41,7 @@ start_getting_input:
 .End:
     ret
 
-;; Clear the input buffer
-;; ----------------------
+;; reset_cmd: fill input buffer by zeros to reset it
 reset_cmd:
     pusha
     mov cx, 60
@@ -51,8 +53,7 @@ reset_cmd_loop:
     popa
     ret
 
-;; Clear current char at cursor position
-;; -------------------------------------
+;; clear_current_char: clear char at current cursor position
 clear_current_char:
     pusha
     mov bh, 0
@@ -64,9 +65,8 @@ clear_current_char:
     popa
     ret
 
-;; Get keystroke
-;; Return: %AL = Keystroke
-;; -------------------------------------
+;; get_keystroke: get keystroke
+;; Return: al = Keystroke
 get_keystroke:
     xor ax, ax
     int 0x16

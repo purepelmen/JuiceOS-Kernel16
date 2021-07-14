@@ -1,25 +1,42 @@
-jmp start_kernel
+;; check_running_type: check running type stored in 'al'
+;; al - 0xBF = initial loading. Bootloader loads kernel with this code
+;; al - 0xC0 = Returning. Uses in other software to return to kernel execution
+;; al - 0xF0 = Returning from power saving (sleep). Used by kernel to return to execution.
+check_running_type:
+    cmp al, 0xBF
+    je .BootSectorRunning
+    cmp al, 0xC0
+    je .ReturnRunning
+    cmp al, 0xF0
+    je .SleepReturnRunning
 
-back_from_program:
-    jmp get_input
+    ;; If code is incorrect - hang there
+    mov si, runningTypeDeterminationFailure
+    call print_string
+    call get_keystroke
+    jmp cmd_reboot
 
-start_kernel:
-    cmp byte [bootDrive], 0xFF
-    je set_boot_drive
-start_kernel_ret:
+.BootSectorRunning:
+    xor ax, ax
+    mov [bootDrive], dl
+    mov byte [runType], 0xBF
     call reset_screen
     jmp get_input_nbl
 
-set_boot_drive:
-    mov [bootDrive], dl
-    jmp start_kernel_ret
+.ReturnRunning: 
+    xor ax, ax
+    mov byte [runType], 0xC0
+    jmp get_input
 
-; Start new input
+.SleepReturnRunning:
+    xor ax, ax
+    mov byte [runType], 0xF0
+    jmp get_input_nbl
+
+;; Start new input
 get_input:
-    mov ax, 0x0e0a
-    int 0x10
-    mov al, 0xD
-    int 0x10
+    mov si, newLine
+    call print_string
 get_input_nbl:
     mov si, prompt
     call print_string
@@ -27,7 +44,6 @@ get_input_nbl:
     call start_getting_input
 
 ;; Command handler
-;; ----------------------
 process_input:
     ;; If nothing was printed, skip it
     cmp di, inputBuffer
@@ -80,6 +96,18 @@ process_input:
     call copmare_string
     cmp al, 0x01
     je cmd_help
+
+    mov si, inputBuffer
+    mov di, cmdPowerSave
+    call copmare_string
+    cmp al, 0x01
+    je cmd_powersave
+
+    mov si, inputBuffer
+    mov di, cmdRunType
+    call copmare_string
+    cmp al, 0x01
+    je cmd_runtype
 
     call check_file
 
@@ -182,6 +210,46 @@ cmd_help:
     call print_string
     jmp get_input
 
+cmd_powersave:
+    call reset_screen
+    mov si, powerSaveMsg
+    call print_string
+
+    .PowerSaveLoop:
+        hlt
+        call get_keystroke
+        cmp al, 0x20
+        je .Exit
+        jmp .PowerSaveLoop
+
+    .Exit:
+        call reset_screen
+        mov al, 0xF0
+        jmp 0x0
+
+cmd_runtype:
+    cmp byte [runType], 0xBF
+    je .Bootloader
+    cmp byte [runType], 0xC0
+    je .Returned
+    cmp byte [runType], 0xF0
+    je .WokeUp
+
+.Bootloader:
+    mov si, runnedTypeBootloader
+    call print_string
+    jmp get_input
+
+.Returned:
+    mov si, runnedTypeReturned
+    call print_string
+    jmp get_input
+
+.WokeUp:
+    mov si, runnedTypeWokeUp
+    call print_string
+    jmp get_input
+
 %include "includes/fs/load_sector.asm"
 %include "includes/utils/screen.asm"
 %include "includes/utils/string.asm"
@@ -190,7 +258,8 @@ cmd_help:
 %include "includes/fs/sfts.asm"
 
 inputBuffer: resb 60
-bootDrive: db 0xFF
+bootDrive: db 0x00
+runType: db 0x00
 
 prompt: db 'PC>', 0
 cmdHello: db 'hello', 0
@@ -201,13 +270,21 @@ cmdAscii: db 'ascii', 0
 cmdCls: db 'cls', 0
 cmdDir: db 'dir', 0
 cmdHelp: db 'help', 0
+cmdPowerSave: db 'powersave', 0
+cmdRunType: db 'runtype', 0
 
-newLine: db 0xA, 0xD, 0
 hex_prefix: db '0x', 0
-cmd_not_found: db 0xA, 0xD, 'Oh, it is like your command/file is not exist. :(', 0xA, 0xD, 0
+newLine: db 0xA, 0xD, 0
 entered_cmd_hello: db 0xA, 0xD, 'Helloooo :)', 0xA, 0xD, 0
-systemInfoStr: db 0xA, 0xD, 'JuiceOS v1.0 (Working in Kernel16).', 0xA, 0xD, 'Booted from: ', 0
 enter_char_str: db 0xA, 0xD, 'Please type the char on your keyboard: ', 0
+runnedTypeBootloader: db 0xA, 0xD, 'Last kernel run was from bootloader.', 0xA, 0xD, 0
+powerSaveMsg: db 'You are in power saving mode now. To exit from here - press SPACE.', 0
+cmd_not_found: db 0xA, 0xD, 'Oh, it is like your command/file is not exist. :(', 0xA, 0xD, 0
+systemInfoStr: db 0xA, 0xD, 'JuiceOS v1.0 (Working in Kernel16).', 0xA, 0xD, 'Booted from: ', 0
+runnedTypeWokeUp: db 0xA, 0xD, 'Last kernel run was returned from power save mode.', 0xA, 0xD, 0
+runnedTypeReturned: db 0xA, 0xD, 'Last kernel run was returned from other software.', 0xA, 0xD, 0
+runningTypeDeterminationFailure: db 0xA, 0xD, 'The kernel was runned unsupported way.',\
+                        0xA, 0xD, 'Kernel will not be running. Press any key to restart system.', 0
 
 fileTableHeader: db 'File Name - Location Sector - Size', 0xA, 0xD,\
                     '----------------------------------------------------------------', 0xA, 0xD, 0
@@ -218,7 +295,9 @@ helpHeader: db 0xA, 0xD, 'HELLO - Test command that say hello to you', 0xA, 0xD,
                          'TEST - Developer command that help us test current features', 0xA, 0xD,\
                          'ASCII - Prints hex representation of typed char', 0xA, 0xD,\
                          'CLS - Clear the console', 0xA, 0xD,\
-                         'DIR - Print file list', 0xA, 0xD, 0
+                         'DIR - Print file list', 0xA, 0xD,\
+                         'POWERSAVE - Enter power saving mode', 0xA, 0xD,\
+                         'RUNTYPE - Print last kernel run type', 0xA, 0xD, 0
 
 floppy_a: db ' (Floppy Drive A)', 0
 floppy_b: db ' (Floppy Drive B)', 0
@@ -227,4 +306,4 @@ harddrive_a db ' (First HDD)', 0
 harddrive_b db ' (Second HDD)', 0
 harddrive_c db ' (Third HDD)', 0
 
-times 2048-($-$$) db 0
+times 4096-($-$$) db 0

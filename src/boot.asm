@@ -15,7 +15,7 @@ read_disk:
     mov cl, 2
     mov dh, 0
 
-    mov al, 4
+    mov al, 8
     mov ah, 0x02
     int 0x13
 
@@ -24,7 +24,7 @@ read_disk:
     cmp ah, 0
     jne read_error
 
-    cmp al, 4
+    cmp al, 8
     jne sectors_not_read_error
 
 running_kernel:
@@ -36,7 +36,8 @@ running_kernel:
     mov ss, ax
     mov sp, 0xFFFF
 
-    jmp 0x0200:0x0000
+    mov al, 0xBF                ; Bootloader running code
+    jmp 0x0200:0x0000           ; Jump to kernel
 
 ;; Prints a string
 ;; -------------------------------

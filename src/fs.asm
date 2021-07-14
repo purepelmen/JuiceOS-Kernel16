@@ -8,6 +8,6 @@
 ;;  unsigned byte     Sectors count
 ;;
 
-db  'dumper.bin', 0, 8, 4
+db  'dumper.bin', 0, 12, 4
 
 times 1024-($-$$) db 0

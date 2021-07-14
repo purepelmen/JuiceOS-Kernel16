@@ -1,5 +1,5 @@
 ;;
-;; sfts.asm: SFTS file system driver
+;; sfts.asm: SDFS file system driver
 ;;
 
 ;; print_files: print all file table
@@ -139,7 +139,7 @@ load_filetable:
     mov es, ax
     xor bx, bx
 
-    mov cl, 6           ; Start sector
+    mov cl, 10           ; Start sector
     mov al, 2           ; Sectors count
     mov dl, [bootDrive] ; Drive
 

@@ -1,14 +1,16 @@
+;;
+;; dumper.bin: Dumper program by JuiceOS software
+;;
+
 get_input:
-    mov ax, 0x0e0a
-    int 0x10
-    mov al, 0x0D
-    int 0x10
+    mov si, newLine
+    call print_string
 get_input_nbl:
     mov si, prompt
     call print_string
 
-    push 0x07e0
-    pop es
+    mov ax, 0x07e0
+    mov es, ax
 
     call start_getting_input
 
@@ -183,7 +185,8 @@ cmd_end:
     mov es, ax
     mov ds, ax
     
-    jmp 0x0200:0x0002
+    mov al, 0xC0
+    jmp 0x0200:0x0000
 
 %include "includes/utils/screen.asm"
 %include "includes/utils/string.asm"
