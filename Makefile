@@ -6,3 +6,6 @@ build:
 	@nasm -f bin -o bin/main/fs.bin src/fs.asm
 	@nasm -f bin -o bin/software/dumper.bin src/dumper.asm
 	@cat $(FILES_TO_CAT) > bin/os.bin 
+
+run:
+	@qemu-system-x86_64	bin/os.bin
