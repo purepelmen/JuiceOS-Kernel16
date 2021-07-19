@@ -9,7 +9,9 @@ make run
 ```
 
 ## How to run OS on Windows?
-Just run `run.bat` file in the working directory.
+First you need ro open `run.bat`, and there You must change the path to your `bin/os.bin` file. 
+
+Then just run `run.bat` file in the working directory.
 
 :warning: **QEMU must be installed on Windows**
 
