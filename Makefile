@@ -1,11 +1,14 @@
-FILES_TO_CAT = bin/main/boot.bin bin/main/kernel.bin bin/main/fs.bin bin/software/dumper.bin
+B_MAIN = bin/main
+B_SOFT = bin/software
+RAW_OS = bin/os.bin
+FILES_TO_CAT = $(B_MAIN)/boot.bin $(B_MAIN)/kernel.bin $(B_MAIN)/fs.bin $(B_SOFT)/dumper.bin
 
 build:
-	@nasm -f bin -o bin/main/boot.bin src/boot.asm
-	@nasm -f bin -o bin/main/kernel.bin src/kernel.asm
-	@nasm -f bin -o bin/main/fs.bin src/fs.asm
-	@nasm -f bin -o bin/software/dumper.bin src/dumper.asm
-	@cat $(FILES_TO_CAT) > bin/os.bin 
+	@nasm -f bin -o $(B_MAIN)/boot.bin src/boot.asm
+	@nasm -f bin -o $(B_MAIN)/kernel.bin src/kernel.asm
+	@nasm -f bin -o $(B_MAIN)/fs.bin src/fs.asm
+	@nasm -f bin -o $(B_SOFT)/dumper.bin src/dumper.asm
+	@cat $(FILES_TO_CAT) > $(RAW_OS) 
 
 run:
-	@qemu-system-x86_64	bin/os.bin
+	@qemu-system-x86_64	$(RAW_OS)

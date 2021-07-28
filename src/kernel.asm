@@ -115,6 +115,12 @@ process_input:
     cmp al, 0x01
     je cmd_ps2test
 
+    mov si, inputBuffer
+    mov di, cmdTime
+    call copmare_string
+    cmp al, 0x01
+    je cmd_time
+
     call check_file
 
     mov si, cmd_not_found
@@ -273,6 +279,59 @@ cmd_ps2test:
     call print_string
     jmp get_input
 
+cmd_time:
+    mov si, cuurTimeStr
+    call print_string
+
+    mov ah, 0x04
+    int 0x1A
+
+    mov al, dl
+    call print_hexb
+
+    mov ah, 0x0e
+    mov al, '.'
+    int 0x10
+
+    mov al, dh
+    call print_hexb
+
+    mov ah, 0x0e
+    mov al, '.'
+    int 0x10
+
+    mov ax, cx
+    call print_hexw
+
+    mov ah, 0x0e
+    mov al, ' '
+    int 0x10
+
+    mov ah, 0x02
+    int 0x1A
+
+    mov al, ch
+    call print_hexb
+
+    mov ah, 0x0e
+    mov al, ':'
+    int 0x10
+
+    mov al, cl
+    call print_hexb
+
+    mov ah, 0x0e
+    mov al, ':'
+    int 0x10
+    
+    mov al, dh
+    call print_hexb
+
+    mov si, newLine
+    call print_string 
+
+    jmp get_input
+
 %include "includes/fs/load_sector.asm"
 %include "includes/utils/screen.asm"
 %include "includes/utils/string.asm"
@@ -292,6 +351,7 @@ cmdTest: db 'test', 0
 cmdAscii: db 'ascii', 0
 cmdCls: db 'cls', 0
 cmdDir: db 'dir', 0
+cmdTime: db 'dtime', 0
 cmdHelp: db 'help', 0
 cmdPowerSave: db 'powersave', 0
 cmdRunType: db 'runtype', 0
@@ -300,6 +360,7 @@ cmdPs2KeyboardTest: db 'ps2test', 0
 hex_prefix: db '0x', 0
 newLine: db 0xA, 0xD, 0
 entered_cmd_hello: db 0xA, 0xD, 'Helloooo :)', 0xA, 0xD, 0
+cuurTimeStr: db 0xA, 0xD, 'Current time/date: ', 0
 enter_char_str: db 0xA, 0xD, 'Please type the char on your keyboard: ', 0
 keyboardPs2TestSuccess: db 0xA, 0xD, 'Keyboard responded to echo-command. PS/2 Keyboard - PASS', 0xA, 0xD, 0
 keyboardPs2TestFailure: db 0xA, 0xD, 'Keyboard not responded properly to echo-command. PS/2 Keyboard - FAIL', 0xA, 0xD, 0
@@ -324,7 +385,8 @@ helpHeader: db 0xA, 0xD, 'HELLO - Test command that say hello to you', 0xA, 0xD,
                          'DIR - Print file list', 0xA, 0xD,\
                          'POWERSAVE - Enter power saving mode', 0xA, 0xD,\
                          'RUNTYPE - Print last kernel run type', 0xA, 0xD,\
-                         'PS2TEST - Send to PS/2 Keyboard echo-command. It is used to test PS/2 keyboards.', 0
+                         'PS2TEST - Send to PS/2 Keyboard echo-command.', 0xA, 0xD,\
+                         'DTIME - Get current date and time', 0xA, 0xD, 0
 
 floppy_a: db ' (Floppy Drive A)', 0
 floppy_b: db ' (Floppy Drive B)', 0
