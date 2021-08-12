@@ -1,1 +1,1 @@
-qemu-system-x86_64 \\wsl$\Ubuntu-18.04\home\daniel\myos\bin\os.bin
+qemu-system-x86_64 \\wsl$\Ubuntu-20.04\home\daniel\kernel16\bin\os.bin

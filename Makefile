@@ -10,5 +10,8 @@ build:
 	@nasm -f bin -o $(B_SOFT)/dumper.bin src/dumper.asm
 	@cat $(FILES_TO_CAT) > $(RAW_OS) 
 
+	@rm $(B_MAIN)/*
+	@rm $(B_SOFT)/*
+
 run:
 	@qemu-system-x86_64	$(RAW_OS)

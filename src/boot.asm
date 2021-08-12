@@ -3,71 +3,64 @@ nop
 resb 8 + 25
 
 start_boot:
-    mov ax, 0x07c0
-    mov ds, ax
+    mov ax, 0x07c0          ; Address to the bootsector
+    mov ds, ax              ; Load data segment to bootsector location
 
+;; Read the disk for kernel
+;; -------------------------------
 read_disk:
-    mov ax, 0x0200
-    mov es, ax
-    xor bx, bx
+    mov bx, 0x2000          ; Where the kernel must be located
 
-    mov ch, 0
-    mov cl, 2
-    mov dh, 0
+    mov ch, 0               ; Cylinder
+    mov cl, 2               ; Sector (1-based)
+    mov dh, 0               ; Track/Head
 
-    mov al, 8
-    mov ah, 0x02
+    mov al, 8               ; Sectors count to read
+    mov ah, 0x02            ; Read disk operation
     int 0x13
 
-    jc read_error
+    jc read_error           ; Carry is set if an error occured
 
-    cmp ah, 0
-    jne read_error
+    cmp ah, 0               ; If AH != 0, an error occured
+    jne read_error          ; Handle read error
 
-    cmp al, 8
-    jne sectors_not_read_error
-
+;; Run the loaded kernel
+;; -------------------------------
 running_kernel:
-    mov ax, 0x0200
-    mov ds, ax
-    mov es, ax
+    mov ax, 0x0200          ; Kernel address
+    mov ds, ax              ; Data segment <== Kernel address
+    mov es, ax              ; Extra segment <== Kernel address
 
-    mov ax, 0x0900
-    mov ss, ax
-    mov sp, 0xFFFF
+    mov sp, 0xFFFF          ; Stack pointer <== Max available stack pointer
+    mov ax, 0x0900          ; Address for stack segment
+    mov ss, ax              ; Stack segment <== 0x9000
 
-    mov al, 0xBF                ; Bootloader running code
-    jmp 0x0200:0x0000           ; Jump to kernel
+    mov al, 0xBF            ; Bootloader running code
+    jmp 0x0200:0x0000       ; Jump to kernel
 
 ;; Prints a string
 ;; -------------------------------
 print_string:
     pusha
-    mov ah, 0x0e
-print_string_loop:
+.loop:
     lodsb
     cmp al, 0
-    je print_string_end
+    je .end
+    mov ah, 0x0e
     int 0x10
-    jmp print_string_loop
-print_string_end:
+    jmp .loop
+.end:
     popa
     ret
 
-;; Disk read error handlers
+;; Disk read error handler
 ;; -------------------------------
 read_error:
-    mov si, readErr
+    mov si, readErrorStr
     call print_string
     jmp $
 
-sectors_not_read_error:
-    mov si, sectorsCountNotMatchErr
-    call print_string
-    jmp $
-
-readErr: db 'Kernel reading and loading failure!', 0
-sectorsCountNotMatchErr: db 'Not all sectors was read from disk!', 0
+readErrorStr: db 'Kernel reading and loading failure!', 0
 
 times 510-($-$$) db 0
 dw 0xAA55
