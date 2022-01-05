@@ -29,7 +29,7 @@ Structure:
 
     Type              Description
     ------------------------------------------------
-    String            File name (zero at the end)
+    string            File name (zero at the end)
     unsigned byte     Starting sector
     unsigned byte     Sectors count
 

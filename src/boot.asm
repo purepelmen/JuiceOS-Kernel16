@@ -1,6 +1,6 @@
 jmp start_boot
 nop
-resb 8 + 25
+times 8 + 25 db 0
 
 start_boot:
     mov ax, 0x07c0          ; Address to the bootsector

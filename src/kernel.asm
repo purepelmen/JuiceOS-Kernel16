@@ -337,7 +337,7 @@ cmd_time:
 %include "includes/utils/string.asm"
 %include "includes/utils/input.asm"
 %include "includes/utils/hex.asm"
-%include "includes/fs/sfts.asm"
+%include "includes/fs/sdfs.asm"
 
 inputBuffer: resb 60
 bootDrive: db 0x00

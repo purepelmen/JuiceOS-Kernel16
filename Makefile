@@ -1,3 +1,5 @@
+# Type "make" in this folder to compile and run OS on Linux.
+
 B_MAIN = bin/main
 B_SOFT = bin/software
 RAW_OS = bin/os.bin

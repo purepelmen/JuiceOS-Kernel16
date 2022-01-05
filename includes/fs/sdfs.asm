@@ -1,5 +1,5 @@
 ;;
-;; sfts.asm: SDFS file system driver
+;; sdfs.asm: SDFS file system driver
 ;;
 
 ;; print_files: print all file table
