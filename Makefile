@@ -6,6 +6,9 @@ RAW_OS = bin/os.bin
 FILES_TO_CAT = $(B_MAIN)/boot.bin $(B_MAIN)/kernel.bin $(B_MAIN)/fs.bin $(B_SOFT)/dumper.bin
 
 build:
+	@mkdir $(B_MAIN)
+	@mkdir $(B_SOFT)
+	
 	@nasm -f bin -o $(B_MAIN)/boot.bin src/boot.asm
 	@nasm -f bin -o $(B_MAIN)/kernel.bin src/kernel.asm
 	@nasm -f bin -o $(B_MAIN)/fs.bin src/fs.asm
